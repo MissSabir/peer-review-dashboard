@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Peer Reviewer — Research Digest</title>
+<style>
+  /* Aptos is a Microsoft/Office font; use Aptos if available, otherwise fall back to similar clean sans-serif */
+  @font-face {
+    font-family: 'Aptos';
+    src: local('Aptos'), local('Aptos-Regular');
+  }
+
+  :root {
+    --ink: #01324b;       /* Universal Blue */
+    --paper: #ffffff;
+    --cream: #eaf2f6;
+    --accent: #ff8200;    /* Summer Orange */
+    --accent2: #267e9e;   /* Deep Teal */
+    --green: #4AC365;     /* Spring Green */
+    --purple: #c46bff;    /* Indigo Lavender */
+    --muted: #4a6a7a;
+    --rule: #c8dde8;
+    --font: 'Aptos', 'Segoe UI', 'Calibri', Arial, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font);
+    font-weight: 400;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: #01324b;
+    color: white;
+    padding: 60px 80px 50px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, #01324b 0%, #013d5e 60%, #015078 100%);
+  }
+
+  .header-label {
+    font-family: var(--font);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.1s;
+  }
+
+  h1 {
+    font-family: var(--font);
+    font-size: clamp(42px, 6vw, 76px);
+    font-weight: 800;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.2s;
+    color: white;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .header-sub {
+    font-size: 15px;
+    color: rgba(255,255,255,0.7);
+    max-width: 580px;
+    line-height: 1.7;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.35s;
+  }
+
+  .header-stats-row {
+    display: flex;
+    gap: 60px;
+    margin-top: 50px;
+    padding-top: 40px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.5s;
+  }
+
+  .hstat { }
+  .hstat-num {
+    font-family: var(--font);
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--accent);
+    display: block;
+    line-height: 1;
+  }
+  .hstat-label {
+    font-family: var(--font);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-top: 6px;
+    display: block;
+  }
+
+  /* NAV TABS */
+  .nav-tabs {
+    background: var(--cream);
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    padding: 0 80px;
+    gap: 0;
+    overflow-x: auto;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .tab {
+    font-family: var(--font);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 18px 24px;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .tab:hover { color: var(--ink); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* SECTIONS */
+  .section {
+    display: none;
+    padding: 70px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+    animation: fadeUp 0.4s ease forwards;
+  }
+  .section.active { display: block; }
+
+  .section-eyebrow {
+    font-family: var(--font);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .section-title {
+    font-family: var(--font);
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 14px;
+  }
+
+  .section-desc {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.8;
+    max-width: 680px;
+    margin-bottom: 50px;
+  }
+
+  hr.rule {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 50px 0;
+  }
+
+  /* CARDS GRID */
+  .cards { display: grid; gap: 24px; }
+  .cards-2 { grid-template-columns: 1fr 1fr; }
+  .cards-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent);
+  }
+
+  .card.blue::before { background: var(--accent2); }
+  .card.gold::before { background: var(--green); }
+
+  .card-icon {
+    font-size: 28px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .card-title {
+    font-family: var(--font);
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .card-body {
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--ink);
+  }
+
+  /* BAR CHARTS */
+  .chart-container { margin: 30px 0; }
+  .chart-title {
+    font-family: var(--font);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .bar-label {
+    font-size: 13px;
+    color: var(--ink);
+    width: 220px;
+    flex-shrink: 0;
+    line-height: 1.3;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 28px;
+    background: var(--cream);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0;
+    transition: width 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+  }
+
+  .bar-fill.blue { background: var(--accent2); }
+  .bar-fill.gold { background: var(--green); }
+  .bar-fill.muted { background: #8aaabb; }
+
+  .bar-val {
+    font-family: var(--font);
+    font-size: 11px;
+    color: white;
+    white-space: nowrap;
+  }
+
+  /* STAT BLOCKS */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--rule); margin: 30px 0; }
+  .stat-cell {
+    background: var(--paper);
+    padding: 30px 24px;
+    text-align: center;
+  }
+  .stat-big {
+    font-family: var(--font);
+    font-size: 42px;
+    font-weight: 900;
+    color: var(--accent);
+    display: block;
+    line-height: 1;
+  }
+  .stat-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+
+  /* LIFECYCLE TIMELINE */
+  .timeline {
+    position: relative;
+    padding-left: 30px;
+    margin: 30px 0;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 1px;
+    background: var(--rule);
+  }
+  .tl-item {
+    position: relative;
+    padding: 0 0 40px 40px;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -5px; top: 6px;
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .tl-item.blue::before { background: var(--accent2); }
+  .tl-item.gold::before { background: var(--green); }
+  .tl-item.muted-dot::before { background: var(--muted); }
+
+  .tl-stage {
+    font-family: var(--font);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .tl-item.blue .tl-stage { color: var(--accent2); }
+  .tl-item.gold .tl-stage { color: var(--green); }
+  .tl-item.muted-dot .tl-stage { color: var(--muted); }
+
+  .tl-heading {
+    font-family: var(--font);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .tl-body { font-size: 14px; color: var(--ink); line-height: 1.75; max-width: 620px; }
+
+  /* QUOTE PULL */
+  .pullquote {
+    border-left: 3px solid var(--green);
+    padding: 20px 28px;
+    margin: 30px 0;
+    background: white;
+  }
+  .pullquote p {
+    font-family: var(--font);
+    font-style: normal;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .pullquote cite {
+    font-family: var(--font);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 12px;
+    display: block;
+  }
+
+  /* PUBLISHER COMPARISON */
+  .pub-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin: 30px 0;
+  }
+  .pub-table th {
+    font-family: var(--font);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 2px solid var(--rule);
+    background: var(--cream);
+  }
+  .pub-table td {
+    padding: 16px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  .pub-table tr:hover td { background: rgba(255,255,255,0.6); }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--font);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    margin: 2px;
+  }
+  .badge-green { background: #d6f5de; color: #1a5e2e; border-left: 2px solid #4AC365; }
+  .badge-yellow { background: #fff0dc; color: #7a4800; border-left: 2px solid #ff8200; }
+  .badge-red { background: #fde8e8; color: #721c24; border-left: 2px solid #c84b2f; }
+  .badge-blue { background: #d4eaf2; color: #01324b; border-left: 2px solid #267e9e; }
+
+  /* FATIGUE METER */
+  .fatigue-scale {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 36px;
+    margin: 30px 0;
+  }
+  .fatigue-title {
+    font-family: var(--font);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .fatigue-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+  .fatigue-bar {
+    height: 36px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #267e9e 0%, #4AC365 35%, #ff8200 65%, #01324b 100%);
+    position: relative;
+    margin-bottom: 10px;
+  }
+  .fatigue-marker {
+    position: absolute;
+    top: -6px;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .fatigue-marker-line {
+    width: 1px;
+    height: 48px;
+    background: var(--ink);
+    margin-top: 0;
+  }
+  .fatigue-marker-label {
+    font-family: var(--font);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    margin-top: 6px;
+    color: var(--ink);
+    text-align: center;
+  }
+  .fatigue-ticks {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font);
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .fatigue-legend {
+    display: flex;
+    gap: 28px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .fatigue-leg-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .fatigue-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* TWO-COL */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+
+  /* FOOTNOTE */
+  .footnote {
+    font-family: var(--font);
+    font-size: 11px;
+    color: var(--muted);
+    padding-top: 30px;
+    border-top: 1px solid var(--rule);
+    line-height: 1.7;
+    margin-top: 60px;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* DONUT CHART */
+  .donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    margin: 20px 0;
+  }
+  .donut-svg { flex-shrink: 0; }
+  .donut-legend { flex: 1; }
+  .donut-leg-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+  .donut-swatch {
+    width: 12px; height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .donut-pct {
+    font-family: var(--font);
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  @media (max-width: 900px) {
+    header { padding: 40px 24px 36px; }
+    .header-stats-row { flex-wrap: wrap; gap: 28px; }
+    .nav-tabs { padding: 0 16px; }
+    .section { padding: 40px 24px; }
+    .cards-2, .cards-3 { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .bar-label { width: 130px; font-size: 12px; }
+    .pub-table { font-size: 12px; }
+    .pub-table th, .pub-table td { padding: 10px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">User Research Synthesis · Peer Review</div>
+  <h1>The Peer<br><em>Reviewer</em></h1>
+  <p class="header-sub">A research digest on who reviews, why they do it, when they stop, and what publishers can do about it. Drawn from Publons, IOP Publishing, and academic literature up to 2025.</p>
+  <div class="header-stats-row">
+    <div class="hstat">
+      <span class="hstat-num">68.5M</span>
+      <span class="hstat-label">Hours spent reviewing / year globally</span>
+    </div>
+    <div class="hstat">
+      <span class="hstat-num">19.1</span>
+      <span class="hstat-label">Average days to complete one review</span>
+    </div>
+    <div class="hstat">
+      <span class="hstat-num">5.6×</span>
+      <span class="hstat-label">Avg invitations sent per paper to secure enough reviewers</span>
+    </div>
+    <div class="hstat">
+      <span class="hstat-num">3–10</span>
+      <span class="hstat-label">Reviews per year for an active reviewer</span>
+    </div>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <button class="tab active" onclick="showSection('who')">01 · Who Reviews</button>
+  <button class="tab" onclick="showSection('decision')">02 · Accept or Decline</button>
+  <button class="tab" onclick="showSection('process')">03 · The Process</button>
+  <button class="tab" onclick="showSection('motivation')">04 · Motivation & Reward</button>
+  <button class="tab" onclick="showSection('fatigue')">05 · Fatigue & Volume</button>
+  <button class="tab" onclick="showSection('publishers')">06 · Publisher Landscape</button>
+</nav>
+
+<!-- SECTION 1: WHO REVIEWS -->
+<div class="section active" id="who">
+  <div class="section-eyebrow">Section 01</div>
+  <h2 class="section-title">Who Actually Reviews</h2>
+  <p class="section-desc">The reviewer population skews experienced, senior, and male. But subgroups — early-career researchers, industry scientists, and researchers from emerging regions — behave in meaningfully different ways.</p>
+
+  <div class="stat-grid">
+    <div class="stat-cell">
+      <span class="stat-big">88%</span>
+      <div class="stat-sub">Have 5+ years experience (Publons 2018)</div>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-big">80%</span>
+      <div class="stat-sub">Male in physical sciences survey (IOP 2024)</div>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-big">&gt;50%</span>
+      <div class="stat-sub">Review only every couple of months or less (T&amp;F 2023)</div>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-big">~4%</span>
+      <div class="stat-sub">Review more than once a week — typically editorial board members (T&amp;F 2023)</div>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <div class="two-col">
+    <div>
+      <div class="chart-container">
+        <div class="chart-title">Reviews per year by region (Publons data)</div>
+        <div class="bar-row">
+          <div class="bar-label">High-income countries</div>
+          <div class="bar-track"><div class="bar-fill blue" data-w="85"><span class="bar-val">1.95 reviews/submission</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Emerging regions</div>
+          <div class="bar-track"><div class="bar-fill muted" data-w="30"><span class="bar-val">0.66 reviews/submission</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">USA / UK / Japan</div>
+          <div class="bar-track"><div class="bar-fill blue" data-w="92"><span class="bar-val">Significantly higher volume</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="cards">
+        <div class="card blue">
+          <div class="card-title">Early Career Researchers (ECRs)</div>
+          <div class="card-body">More willing than senior researchers to accept invitations, especially from high-impact indexed journals (SCI/SSCI). They see it as building expertise and credibility. But they're less confident and often lack formal training. A sense of extra-role responsibility drives them more than it does senior peers.</div>
+        </div>
+        <div class="card gold">
+          <div class="card-title">Industry Researchers — The Untapped Pool</div>
+          <div class="card-body">Industry-based researchers consistently report receiving <em>fewer</em> invitations and having <em>more</em> time available to review than academic counterparts. Publishers who want to expand their reviewer pool have a clear, underused source here.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">Sources: Publons Global State of Peer Review (2018, n=11,800+); IOP Publishing State of Peer Review (2024, n=3,046); Taylor &amp; Francis Peer Reviewer Survey (2023, 1,000+ journals); Comparative ECR/SCR study, China.</div>
+</div>
+
+<!-- SECTION 2: ACCEPT OR DECLINE -->
+<div class="section" id="decision">
+  <div class="section-eyebrow">Section 02</div>
+  <h2 class="section-title">The Accept / Decline Decision</h2>
+  <p class="section-desc">Reviewers run through a rapid mental checklist in seconds. The factors that get them to yes — and no — are well-documented and consistent across disciplines.</p>
+
+  <div class="two-col">
+    <div>
+      <div class="chart-container">
+        <div class="chart-title">Why reviewers say YES (ranked importance)</div>
+        <div class="bar-row">
+          <div class="bar-label">Paper is relevant to their work</div>
+          <div class="bar-track"><div class="bar-fill" data-w="94"><span class="bar-val">★★★★★</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Topic is interesting / novel</div>
+          <div class="bar-track"><div class="bar-fill" data-w="90"><span class="bar-val">★★★★★</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Journal reputation is high</div>
+          <div class="bar-track"><div class="bar-fill" data-w="82"><span class="bar-val">★★★★☆</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Opportunity to learn something new</div>
+          <div class="bar-track"><div class="bar-fill" data-w="74"><span class="bar-val">★★★★☆</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Sense of professional duty</div>
+          <div class="bar-track"><div class="bar-fill" data-w="66"><span class="bar-val">★★★☆☆</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Career advancement</div>
+          <div class="bar-track"><div class="bar-fill muted" data-w="40"><span class="bar-val">★★☆☆☆</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Cash / in-kind payment</div>
+          <div class="bar-track"><div class="bar-fill muted" data-w="20"><span class="bar-val">★☆☆☆☆</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="chart-container">
+        <div class="chart-title">Why reviewers say NO (ranked importance)</div>
+        <div class="bar-row">
+          <div class="bar-label">Too busy / other workload</div>
+          <div class="bar-track"><div class="bar-fill gold" data-w="90"><span class="bar-val">42% cite this</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Outside area of expertise</div>
+          <div class="bar-track"><div class="bar-fill gold" data-w="96"><span class="bar-val">71% cite this</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Too many concurrent review requests</div>
+          <div class="bar-track"><div class="bar-fill gold" data-w="72"><span class="bar-val">High</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Tight / unrealistic deadline</div>
+          <div class="bar-track"><div class="bar-fill gold" data-w="60"><span class="bar-val">Significant</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Low journal reputation / integrity</div>
+          <div class="bar-track"><div class="bar-fill gold" data-w="48"><span class="bar-val">Moderate</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">No prior feedback from that journal</div>
+          <div class="bar-track"><div class="bar-fill muted" data-w="30"><span class="bar-val">Moderate</span></div></div>
+        </div>
+      </div>
+
+      <div class="pullquote">
+        <p>"71% of declined invitations are due to the paper being outside the reviewer's expertise — this is fundamentally a matching failure, not a motivation failure."</p>
+        <cite>— Research synthesis, multiple surveys</cite>
+      </div>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <div class="cards cards-3">
+    <div class="card">
+      <span class="card-icon">🔍</span>
+      <div class="card-title">They Vet the Journal</div>
+      <div class="card-body">Before accepting, experienced reviewers check the journal's impact factor, publishing standards, and ethical reputation. An unfamiliar journal is a fast path to decline. Reviewer guidelines and AI policies are also now part of this checklist.</div>
+    </div>
+    <div class="card blue">
+      <span class="card-icon">⚖️</span>
+      <div class="card-title">They Check for Conflict</div>
+      <div class="card-body">Reviewers assess if they know the authors, have a competing financial interest, or have a prior opinion that would bias their review. This conflict-of-interest check is part of formal COPE guidance.</div>
+    </div>
+    <div class="card gold">
+      <span class="card-icon">⏰</span>
+      <div class="card-title">Time is the Most Honest Filter</div>
+      <div class="card-body">Even reviewers who want to say yes will decline if the deadline is tight. The standard turnaround requested by journals is 14–21 days; shorter windows dramatically increase declination rates.</div>
+    </div>
+  </div>
+
+  <div class="footnote">Sources: IOP Publishing State of Peer Review 2024; Publons Global State of Peer Review 2018; COPE Reviewer Guidelines; multiple journal-level survey studies.</div>
+</div>
+
+<!-- SECTION 3: PROCESS -->
+<div class="section" id="process">
+  <div class="section-eyebrow">Section 03</div>
+  <h2 class="section-title">The Review Process, End to End</h2>
+  <p class="section-desc">What actually happens from the moment an invitation lands to when the review reaches the editor. Each stage carries its own friction and failure points.</p>
+
+  <div class="two-col">
+    <div>
+      <div class="timeline">
+        <div class="tl-item blue">
+          <div class="tl-stage">Stage 1 · Editorial</div>
+          <div class="tl-heading">Editor assigns the manuscript</div>
+          <div class="tl-body">An editor-in-chief, associate editor, or managing editor is assigned. They identify suitable reviewers — typically targeting 2–3 confirmed reviewers minimum. They send out multiple invitations simultaneously because the expected acceptance rate is low (average 5.6 invitations needed per paper).</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-stage">Stage 2 · Invitation</div>
+          <div class="tl-heading">Reviewer receives the invite</div>
+          <div class="tl-body">Reviewer receives an email with abstract and basic paper details. They run the mental checklist: Is this my area? Do I have time? Do I trust this journal? Do I have a conflict of interest? This decision typically takes minutes to a few days.</div>
+        </div>
+        <div class="tl-item gold">
+          <div class="tl-stage">Stage 3 · First read</div>
+          <div class="tl-heading">Initial impression formed</div>
+          <div class="tl-body">The reviewer reads the full manuscript for the first time. This read forms an overall impression. If major structural or ethical problems are immediately visible, a reviewer may recommend rejection at this stage without detailed review. Otherwise, they proceed to detailed analysis.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-stage">Stage 4 · Deep review</div>
+          <div class="tl-heading">Detailed read and note-taking</div>
+          <div class="tl-body">The reviewer reads carefully, taking notes. They assess: originality, scientific significance, methodological rigor, clarity, conciseness, and completeness. They evaluate the argument's construction and whether conclusions are supported by evidence. Average time: ~3–5 hours.</div>
+        </div>
+        <div class="tl-item blue">
+          <div class="tl-stage">Stage 5 · Report</div>
+          <div class="tl-heading">Writing the review</div>
+          <div class="tl-body">The reviewer writes a structured report with: a summary of the paper (in their own words), major concerns (methodological, conceptual, ethical), minor concerns (clarity, language, references), and a recommendation: Accept / Minor Revision / Major Revision / Reject.</div>
+        </div>
+        <div class="tl-item muted-dot">
+          <div class="tl-stage">Stage 6 · Editorial decision</div>
+          <div class="tl-heading">Editor synthesizes and decides</div>
+          <div class="tl-body">The editor reads all reviews, weighs them, and makes a decision. If reviews strongly diverge, a third reviewer may be invited. The editor may not follow reviewer recommendations — this is a common point of friction. Decision is sent to the author with reviewer comments.</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:24px">
+        <div class="card-title">The Time Clock</div>
+        <div class="card-body" style="margin-bottom:16px">Key timing benchmarks from research:</div>
+        <div class="bar-row" style="margin-bottom:12px">
+          <div class="bar-label" style="width:180px">Days to complete review</div>
+          <div class="bar-track"><div class="bar-fill" data-w="64"><span class="bar-val">19.1 days avg</span></div></div>
+        </div>
+        <div class="bar-row" style="margin-bottom:12px">
+          <div class="bar-label" style="width:180px">Hours spent per review</div>
+          <div class="bar-track"><div class="bar-fill blue" data-w="50"><span class="bar-val">~5 hours avg</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label" style="width:180px">Days to receive opinions</div>
+          <div class="bar-track"><div class="bar-fill gold" data-w="78"><span class="bar-val">110.7 days (one study)</span></div></div>
+        </div>
+      </div>
+
+      <div class="card blue" style="margin-bottom:24px">
+        <div class="card-title">What They're Actually Evaluating</div>
+        <div class="card-body">
+          Wiley's reviewer guidelines specify these core assessment dimensions:<br><br>
+          <strong>Originality</strong> — Is this genuinely new?<br>
+          <strong>Scientific significance</strong> — Does it matter to the field?<br>
+          <strong>Conciseness</strong> — Is it as short as it should be?<br>
+          <strong>Precision</strong> — Are claims well-supported?<br>
+          <strong>Completeness</strong> — Are methods fully described?<br>
+          <strong>Clarity</strong> — Can readers follow the argument?
+        </div>
+      </div>
+
+      <div class="pullquote">
+        <p>"Reviewers are not given any formal training by most publishers. The skill of peer review is mostly learned informally — from supervisors, from being reviewed yourself, and from trial and error."</p>
+        <cite>— IOP Publishing State of Peer Review 2024</cite>
+      </div>
+
+      <div class="card gold">
+        <div class="card-title">The AI Wildcard (2024–25)</div>
+        <div class="card-body">35% of researchers predict AI will have a <em>negative</em> impact on peer review; 29% predict <em>positive</em>; 36% neutral. Most major publishers (including IOP) currently prohibit using AI to write or augment review reports, citing data protection and confidentiality concerns. Enforcement is nearly impossible.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">Sources: IOP Publishing 2024; COPE Reviewer Guidelines; Wiley reviewer guidance; journal-level process studies.</div>
+</div>
+
+<!-- SECTION 4: MOTIVATION & REWARD -->
+<div class="section" id="motivation">
+  <div class="section-eyebrow">Section 04</div>
+  <h2 class="section-title">Motivation & Reward</h2>
+  <p class="section-desc">Peer reviewers work for free. Understanding why — and what would make them feel more valued — is the core design challenge for publishers.</p>
+
+  <div class="cards cards-2" style="margin-bottom:40px">
+    <div>
+      <div class="chart-container">
+        <div class="chart-title">What motivates reviewers (intrinsic → extrinsic spectrum)</div>
+        <div class="bar-row">
+          <div class="bar-label">Staying current in field</div>
+          <div class="bar-track"><div class="bar-fill" data-w="90"><span class="bar-val">Very strong</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Sense of scientific duty</div>
+          <div class="bar-track"><div class="bar-fill" data-w="85"><span class="bar-val">Very strong</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Improving own research skills</div>
+          <div class="bar-track"><div class="bar-fill" data-w="80"><span class="bar-val">Strong</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Networking with editors</div>
+          <div class="bar-track"><div class="bar-fill blue" data-w="55"><span class="bar-val">Moderate</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Recognition / career signal</div>
+          <div class="bar-track"><div class="bar-fill blue" data-w="50"><span class="bar-val">Moderate</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Fee waiver / journal access</div>
+          <div class="bar-track"><div class="bar-fill muted" data-w="28"><span class="bar-val">Low-moderate</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Cash payment</div>
+          <div class="bar-track"><div class="bar-fill muted" data-w="14"><span class="bar-val">Low (but rising)</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="pullquote">
+        <p>"Currently, all the glory goes to authors and the profits to publishers. Reviewers should feel that reviewing enhances their self-worth and social standing. An invitation to review should evoke the same sense of importance as an invitation to write an editorial."</p>
+        <cite>— Academic literature on peer review motivation</cite>
+      </div>
+
+      <div class="pullquote" style="border-left-color: var(--accent2); margin-top:20px">
+        <p>"Reviewing a manuscript challenges me to be well-read. It makes me a more responsible researcher. It helps me look at my own work more objectively — and it even helped with my immigration application."</p>
+        <cite>— Senior Research Associate, Springer Nature</cite>
+      </div>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <div class="section-eyebrow">What Publishers Can Offer</div>
+  <h3 style="font-family:'Playfair Display',serif;font-size:24px;margin-bottom:30px;">The Rewards Spectrum</h3>
+
+  <div class="cards cards-3">
+    <div class="card">
+      <span class="card-icon">💬</span>
+      <div class="card-title">Feedback on Their Review</div>
+      <div class="card-body">The #1 requested reward in IOP's 2024 survey. IOP became the first major publisher to offer structured editorial feedback in 2023. ~60% of reviewers opted in. Rated overwhelmingly positively. <strong>Almost no other major publishers do this.</strong></div>
+    </div>
+    <div class="card blue">
+      <span class="card-icon">📋</span>
+      <div class="card-title">Decision Transparency</div>
+      <div class="card-body">Reviewers strongly want to know the final editorial decision on papers they reviewed, with reasoning. This closes the loop and signals that their contribution mattered. Widely requested, unevenly delivered across publishers.</div>
+    </div>
+    <div class="card gold">
+      <span class="card-icon">🏅</span>
+      <div class="card-title">Public Recognition</div>
+      <div class="card-body">Named reviewer listings, certificates, and verified review records (e.g. Publons/ORCID integration) matter more than cash. Recognition creates the social standing and sense of importance that drives continued participation.</div>
+    </div>
+    <div class="card">
+      <span class="card-icon">🎓</span>
+      <div class="card-title">Training Access</div>
+      <div class="card-body">IOP's Peer Review Excellence programme has had 6,000+ sign-ups since 2021. The 2024 survey saw "better peer review training" rise dramatically in importance rankings since 2020. ECRs especially value structured training.</div>
+    </div>
+    <div class="card blue">
+      <span class="card-icon">💳</span>
+      <div class="card-title">Fee Waivers / Journal Access</div>
+      <div class="card-body">Some publishers offer APC (article processing charge) discounts or free journal access in exchange for reviews. These are moderately valued, especially in low-income country contexts where journal access is expensive.</div>
+    </div>
+    <div class="card gold">
+      <span class="card-icon">💰</span>
+      <div class="card-title">Cash Payment (Emerging)</div>
+      <div class="card-body">Rated lowest but trending upward. ResearchHub Journal pays $150/review in crypto. Two other journals ran trials in 2025 with mixed results. Cash is controversial — some argue it changes reviewer motivation from intrinsic to transactional.</div>
+    </div>
+  </div>
+
+  <div class="footnote">Sources: IOP Publishing 2024; Springer Nature reviewer testimonials; academic literature on academic labor and peer review rewards; Nature News (2025).</div>
+</div>
+
+<!-- SECTION 5: FATIGUE & VOLUME -->
+<div class="section" id="fatigue">
+  <div class="section-eyebrow">Section 05</div>
+  <h2 class="section-title">Fatigue, Volume & the Breaking Point</h2>
+  <p class="section-desc">Reviewer fatigue is a structural crisis, not an individual attitude problem. Submission volumes are rising faster than the reviewer pool is growing — and fatigue is caused as much by lack of meaning as by overload.</p>
+
+  <div class="fatigue-scale">
+    <div class="fatigue-title">The Review Load Spectrum: When Fatigue Sets In</div>
+    <div class="fatigue-sub">Based on research data and self-reported reviewer thresholds</div>
+    <div class="fatigue-bar">
+      <div class="fatigue-marker" style="left:10%">
+        <div class="fatigue-marker-line"></div>
+        <div class="fatigue-marker-label">1–2/yr<br>Occasional</div>
+      </div>
+      <div class="fatigue-marker" style="left:32%">
+        <div class="fatigue-marker-line"></div>
+        <div class="fatigue-marker-label">3–5/yr<br>Active</div>
+      </div>
+      <div class="fatigue-marker" style="left:55%">
+        <div class="fatigue-marker-line"></div>
+        <div class="fatigue-marker-label">6–10/yr<br>High commitment</div>
+      </div>
+      <div class="fatigue-marker" style="left:75%">
+        <div class="fatigue-marker-line"></div>
+        <div class="fatigue-marker-label">10–15/yr<br>Risk zone</div>
+      </div>
+      <div class="fatigue-marker" style="left:90%">
+        <div class="fatigue-marker-line"></div>
+        <div class="fatigue-marker-label">15+/yr<br>Burnout likely</div>
+      </div>
+    </div>
+    <div class="fatigue-ticks">
+      <span>0</span><span>3</span><span>6</span><span>9</span><span>12</span><span>15</span><span>18+</span>
+    </div>
+    <div class="fatigue-legend">
+      <div class="fatigue-leg-item"><div class="fatigue-dot" style="background:#267e9e"></div>Sustainable zone (3–10/yr)</div>
+      <div class="fatigue-leg-item"><div class="fatigue-dot" style="background:#4AC365"></div>Elevated risk (10–15/yr)</div>
+      <div class="fatigue-leg-item"><div class="fatigue-dot" style="background:#ff8200"></div>High fatigue risk (15–20/yr)</div>
+      <div class="fatigue-leg-item"><div class="fatigue-dot" style="background:#01324b"></div>Burnout zone (20+/yr)</div>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <div class="two-col">
+    <div>
+      <div class="chart-container">
+        <div class="chart-title">Invitation volume trends (IOP 2024 survey)</div>
+        <div class="bar-row">
+          <div class="bar-label">Received increased invitations</div>
+          <div class="bar-track"><div class="bar-fill" data-w="50"><span class="bar-val">~50% of reviewers</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Have right amount of requests</div>
+          <div class="bar-track"><div class="bar-fill blue" data-w="84"><span class="bar-val">84% in 2024 vs 74% in 2020</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">High-income country reviewers overwhelmed</div>
+          <div class="bar-track"><div class="bar-fill gold" data-w="65"><span class="bar-val">Significantly more</span></div></div>
+        </div>
+      </div>
+
+      <div class="chart-container" style="margin-top:28px">
+        <div class="chart-title">Root causes of fatigue (ranked)</div>
+        <div class="bar-row">
+          <div class="bar-label">Lack of meaning / recognition</div>
+          <div class="bar-track"><div class="bar-fill" data-w="88"><span class="bar-val">Primary psychological driver</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Poor manuscript quality (repetitive)</div>
+          <div class="bar-track"><div class="bar-fill" data-w="76"><span class="bar-val">Monotony accelerates burnout</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">No feedback after reviewing</div>
+          <div class="bar-track"><div class="bar-fill" data-w="70"><span class="bar-val">Feeling ignored</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Sheer volume / overcommitment</div>
+          <div class="bar-track"><div class="bar-fill gold" data-w="65"><span class="bar-val">Classic overload</span></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Poor submission systems</div>
+          <div class="bar-track"><div class="bar-fill muted" data-w="48"><span class="bar-val">Process friction</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:24px">
+        <div class="card-title">The Structural Crisis</div>
+        <div class="card-body">Since 2018, Publons confirmed "widespread signs of peer review fatigue." Academics are now <strong>less likely to accept invitations</strong> than five years prior. Springer Nature's own 2023 Editor Satisfaction Survey (31,273 responses across 2,033 journals) found that <strong>finding reviewers who accept requests is one of the top two pain points for editors</strong> — alongside peer review systems themselves. Editors need to send 5.6 invitations on average just to secure reviewers for a single paper. This isn't reviewer laziness. It's a structural supply-demand mismatch driven by submission growth outpacing reviewer pool growth.</div>
+      </div>
+
+      <div class="pullquote">
+        <p>"Burnout is not only physical but psychological and cognitive. It often arises from engaging in activities that feel devoid of meaning — fatigue is caused not by workload alone, but by a lack of enjoyment in the work."</p>
+        <cite>— Academic literature on reviewer motivation and burnout</cite>
+      </div>
+
+      <div class="card gold">
+        <div class="card-title">What Turns Reviewers Off Invitations</div>
+        <div class="card-body">
+          Top turnoffs based on combined research:<br><br>
+          ❌ Paper is outside their expertise (71% cite this)<br>
+          ❌ Too busy — competing deadlines<br>
+          ❌ Too many concurrent requests<br>
+          ❌ Unrealistically short turnaround<br>
+          ❌ Low journal reputation<br>
+          ❌ Bad submission system / clunky portal<br>
+          ❌ Never receive outcome of reviews<br>
+          ❌ Previous reviews felt ignored
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">Sources: Publons 2018; IOP Publishing State of Peer Review 2024; Springer Nature Reviewer Satisfaction Survey 2021–2024 (time constraints cited as primary barrier to re-reviewing); Taylor &amp; Francis Peer Reviewer Survey 2023; Springer Nature Editor Satisfaction Survey 2023 (31,273 responses — finding and accepting reviewers ranked as top editor pain point); academic literature on reviewer fatigue and editorial processing time.</div>
+</div>
+
+<!-- SECTION 6: PUBLISHERS -->
+<div class="section" id="publishers">
+  <div class="section-eyebrow">Section 06</div>
+  <h2 class="section-title">The Publisher Landscape</h2>
+  <p class="section-desc">For the first time, this section draws on direct survey data from Springer Nature (236,000+ reviewer responses, 2021–2024), Taylor &amp; Francis (2023 reviewer survey, 1,000+ journals), and IOP Publishing — giving a genuine multi-publisher picture.</p>
+
+  <!-- SATISFACTION SCORES COMPARISON -->
+  <div class="section-eyebrow" style="margin-top:0">Publisher Satisfaction Data — What Reviewers Actually Report</div>
+
+  <div class="cards cards-3" style="margin-bottom:40px">
+    <div class="card blue">
+      <div class="card-icon">📊</div>
+      <div class="card-title">Springer Nature</div>
+      <div class="card-body" style="font-size:13px">
+        <strong>85–86%</strong> of reviewers rated their overall experience as excellent or good (2021–2024, n=236,000+ across 2,100 journals).<br><br>
+        <strong>90%</strong> rated their likelihood of reviewing again as 7 or above out of 10.<br><br>
+        Specific process ratings (% excellent/good):<br>
+        Clarity of instructions: <strong>91%</strong><br>
+        Communication with editorial office: <strong>91%</strong><br>
+        Ease of platform: <strong>90%</strong><br>
+        Completeness of submitted files: <strong>89%</strong><br><br>
+        <em style="color:var(--muted);font-size:11px">Source: Springer Nature Reviewer Satisfaction Survey 2021–2024</em>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <div class="card-title">Taylor &amp; Francis</div>
+      <div class="card-body" style="font-size:13px">
+        2023 survey of reviewers across 1,000+ T&amp;F journals revealed the reviewer community profile:<br><br>
+        <strong>Postdoctoral</strong> stage reviewers are overrepresented (career building motive).<br><br>
+        <strong>30+ year</strong> veterans are also frequent — often partially retired but still contributing.<br><br>
+        <strong>More than half</strong> review only every couple of months or less often.<br><br>
+        <strong>~4%</strong> review more than once a week — typically editorial board members.<br><br>
+        <em style="color:var(--muted);font-size:11px">Source: Taylor &amp; Francis Peer Reviewer Survey 2023</em>
+      </div>
+    </div>
+    <div class="card gold">
+      <div class="card-icon">📊</div>
+      <div class="card-title">IOP Publishing</div>
+      <div class="card-body" style="font-size:13px">
+        3,046 physical science researchers surveyed in 2024.<br><br>
+        <strong>84%</strong> report receiving the right number of requests or fewer than their available time (up from 74% in 2020).<br><br>
+        <strong>~50%</strong> report an increase in invitation volume over the prior 3 years.<br><br>
+        Highest-priority fix: <strong>improvements to online submission systems</strong>, followed by better communication between authors, reviewers and editors.<br><br>
+        <em style="color:var(--muted);font-size:11px">Source: IOP Publishing State of Peer Review 2024</em>
+      </div>
+    </div>
+  </div>
+
+  <!-- BEHAVIOUR BY PRESTIGE -->
+  <div class="card" style="margin-bottom:40px">
+    <div class="chart-container">
+      <div class="chart-title">Reviewer behaviour by journal impact factor — Publons data</div>
+      <div class="bar-row">
+        <div class="bar-label">Review word count (low IF)</div>
+        <div class="bar-track"><div class="bar-fill muted" data-w="35"><span class="bar-val">Shorter reviews</span></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Review word count (high IF)</div>
+        <div class="bar-track"><div class="bar-fill" data-w="90"><span class="bar-val">Significantly longer</span></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Days to complete (low IF)</div>
+        <div class="bar-track"><div class="bar-fill muted" data-w="75"><span class="bar-val">Slower turnaround</span></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Days to complete (high IF)</div>
+        <div class="bar-track"><div class="bar-fill blue" data-w="40"><span class="bar-val">Faster turnaround</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="section-eyebrow">Publisher-by-Publisher Breakdown — Policies &amp; Initiatives</div>
+  <table class="pub-table">
+    <thead>
+      <tr>
+        <th>Publisher</th>
+        <th>Reviewer Satisfaction Data</th>
+        <th>Training Program</th>
+        <th>Recognition &amp; Reward</th>
+        <th>Notable 2024–25 Innovation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Springer Nature</strong><br><small style="color:var(--muted)">236,000+ survey responses 2021–24</small></td>
+        <td>
+          <span class="badge badge-green">85–86% satisfied 2020–2024</span><br>
+          <span class="badge badge-green">90% would review again</span><br>
+          <small>Consistent satisfaction across 4 years; time constraints are primary reason for not reviewing again</small>
+        </td>
+        <td><span class="badge badge-green">✓ "How to Peer Review" tutorial</span><br><span class="badge badge-green">✓ Reviewer Communities (ECR masterclasses)</span><br><small>Trusted Reviewer pools launched 2025</small></td>
+        <td>
+          <span class="badge badge-green">✓ Reviewer Dashboard (2024)</span><br>
+          <span class="badge badge-green">✓ Downloadable certificates</span><br>
+          <small>133,000+ certificates downloaded within months of launch. Annual "Year in Review" email to 400,000+ reviewers</small>
+        </td>
+        <td>Expanded Reviewer Communities (2025): thousands of Trusted Reviewers under shared expertise umbrellas. ECR co-review scheme — 17% of Nature manuscripts.</td>
+      </tr>
+      <tr>
+        <td><strong>Taylor &amp; Francis</strong><br><small style="color:var(--muted)">2023 survey across 1,000+ journals</small></td>
+        <td>
+          <span class="badge badge-blue">Postdocs overrepresented</span><br>
+          <span class="badge badge-blue">~4% review weekly</span><br>
+          <small>Most reviewers (50%+) review every few months or less. 30+ year veterans also notably active.</small>
+        </td>
+        <td><span class="badge badge-green">✓ Excellence in Peer Review Training Network</span><br><small>100+ journals offering practical experience to trained reviewers</small></td>
+        <td>
+          <span class="badge badge-yellow">Certificates &amp; acknowledgements</span><br>
+          <span class="badge badge-yellow">Discounts — under review</span><br>
+          <small>Monetary rewards acknowledged as welcome but "an area we continue to analyse and improve"</small>
+        </td>
+        <td>Transparent peer review pilot (EJHE, 2023): full review text published alongside article. Survey found authors and reviewers both supportive — better, fairer reviews and increased recognition.</td>
+      </tr>
+      <tr>
+        <td><strong>IOP Publishing</strong><br><small style="color:var(--muted)">n=3,046 survey, 2024</small></td>
+        <td>
+          <span class="badge badge-green">84% report manageable load</span><br>
+          <span class="badge badge-blue">~50% saw invitations increase</span><br>
+          <small>High-income country reviewers disproportionately overloaded</small>
+        </td>
+        <td><span class="badge badge-green">✓ Peer Review Excellence (iopexcellence.org)</span><br><small>6,000+ sign-ups since 2021, globally accessible and free</small></td>
+        <td>
+          <span class="badge badge-green">✓ Structured 1–5 feedback on review quality</span><br>
+          <small>First major publisher to do this (2023). ~60% opt-in rate. Reviewer feedback on final decision also provided.</small>
+        </td>
+        <td>Double-anonymous peer review standard (2021). Editorial feedback loop (2023) — industry-leading reviewer experience innovation.</td>
+      </tr>
+      <tr>
+        <td><strong>Wiley</strong></td>
+        <td>
+          <span class="badge badge-yellow">No public reviewer satisfaction data</span><br>
+          <small>Wiley peer reviewer study page exists but data not publicly disclosed</small>
+        </td>
+        <td><span class="badge badge-blue">Online reviewer guidance hub</span><br><small>Reviewer guidelines on originality, significance, precision, completeness</small></td>
+        <td>
+          <span class="badge badge-yellow">In-kind recognition</span><br>
+          <small>Partnered with Clarivate/Publons for verified review records (now ORCID integrated)</small>
+        </td>
+        <td>Transparent peer review guidance published. Partnered with Clarivate on reviewer verification. Academic publishers collectively facing class action lawsuit over peer review labour restrictions (Reuters, 2024).</td>
+      </tr>
+      <tr>
+        <td><strong>Elsevier</strong></td>
+        <td>
+          <span class="badge badge-yellow">No recent public reviewer survey</span><br>
+          <small>Last major researcher survey data is not publicly available at reviewer level</small>
+        </td>
+        <td><span class="badge badge-blue">Researcher Academy (free online modules)</span></td>
+        <td>
+          <span class="badge badge-yellow">In-kind (Mendeley Premium)</span><br>
+          <small>ORCID / Publons review verification available</small>
+        </td>
+        <td>Volume of journals (2,500+) creates significant inconsistency in reviewer experience across portfolio.</td>
+      </tr>
+      <tr>
+        <td><strong>ResearchHub Journal</strong></td>
+        <td>
+          <span class="badge badge-blue">Experimental — early stage</span>
+        </td>
+        <td><span class="badge badge-yellow">Limited</span></td>
+        <td>
+          <span class="badge badge-green">$150/review in cryptocurrency</span><br>
+          <span class="badge badge-green">✓ Open peer review (published)</span>
+        </td>
+        <td>Only publisher currently paying cash per review at scale. Results from 2025 trial still emerging.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr class="rule">
+
+  <!-- KEY FINDING CALLOUT -->
+  <div class="cards cards-2" style="margin-bottom:30px">
+    <div class="card blue">
+      <div class="card-title">⚠️ The Transparency Gap</div>
+      <div class="card-body">
+        Springer Nature and Taylor &amp; Francis both now publish meaningful reviewer survey data. IOP publishes the most methodologically detailed research. But <strong>Wiley and Elsevier — two of the largest publishers — publish no equivalent public reviewer satisfaction data</strong>. This makes it nearly impossible for researchers or product teams to benchmark against them fairly. Absence of data is itself a finding.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏆 Where Springer Nature Leads</div>
+      <div class="card-body">
+        With 236,000+ reviewer responses tracked over four years, Springer Nature now has the largest public dataset on reviewer satisfaction. Their 85–86% consistent satisfaction rate and 90% willingness-to-review-again score sets a concrete benchmark. Their 2024–25 investments in Reviewer Communities, downloadable certificates, and the annual reviewer "Year in Review" email represent the most scaled recognition programme currently operating.
+      </div>
+    </div>
+  </div>
+
+  <div class="pullquote">
+    <p>"We know that reviewers face a lot of demand for their time and that reviewer fatigue is a genuine problem. It is therefore vital that Springer Nature continually invest in improving the reviewer experience."</p>
+    <cite>— Marc Gillett, Director of Editorial Engagement, Springer Nature (2025)</cite>
+  </div>
+
+  <div class="cards cards-2" style="margin-top:30px">
+    <div class="card gold">
+      <div class="card-title">What the Best Publishers Do</div>
+      <div class="card-body">
+        Across all publishers with public data, the reviewers who are most satisfied share a consistent set of experiences:<br><br>
+        ✓ Clear, flexible review instructions<br>
+        ✓ Responsive editorial communication<br>
+        ✓ Easy-to-use submission platform<br>
+        ✓ Formal recognition (certificates, listings, dashboards)<br>
+        ✓ Feedback on their review quality<br>
+        ✓ Training that matches their career stage<br>
+        ✓ Reviewer-paper matching that respects their expertise
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">The Gap No Publisher Has Solved</div>
+      <div class="card-body">
+        Across all publishers, <strong>time constraints remain the #1 reason reviewers would not review again</strong> (Springer Nature 2024; T&amp;F 2023). No publisher has solved the structural tension: peer review is unpaid labour in a system where submissions keep rising and researchers' other demands don't shrink. The institutional incentive structure — hiring, tenure, grants — doesn't formally reward reviewing. Certificates and dashboards help at the margin. They don't fix the root cause.
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    Sources: Springer Nature Reviewer Satisfaction Survey 2021–2024 (n=236,000+ across 2,100 journals); Springer Nature "Supporting reviewers: Understanding and improving their experience" blog, April 2025 (Aman Ganpatsingh); Taylor &amp; Francis Peer Reviewer Survey 2023 (1,000+ journals); Taylor &amp; Francis Transparent Peer Review pilot survey, November 2025; IOP Publishing State of Peer Review 2024 (n=3,046); Publons Global State of Peer Review 2018; Nature News March 2025; Reuters, "Academic publishers face class action over peer review pay" September 2024.
+  </div>
+</div>
+
+<script>
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+    animateBars();
+  }
+
+  function animateBars() {
+    setTimeout(() => {
+      document.querySelectorAll('.section.active .bar-fill').forEach(bar => {
+        const w = bar.dataset.w;
+        bar.style.width = w + '%';
+      });
+    }, 100);
+  }
+
+  // Initial animation
+  window.addEventListener('load', () => {
+    animateBars();
+  });
+</script>
+
+</body>
+</html>
